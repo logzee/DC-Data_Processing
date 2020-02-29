@@ -2,25 +2,38 @@ import pandas as pd
 import nltk
 import string
 
-smsHam = pd.read_csv('sms_Ham - spam 2.csv')
-smsHam = smsHam.drop(columns=['Unnamed: 2', 'Unnamed: 3', 'Unnamed: 4'])
+smsData = pd.read_csv('spam 2(1).csv', usecols=['v1', 'v2'], encoding="cp1252")
 
-smsSpam = pd.read_csv('sms_Spam - Sheet1.csv')
-smsSpam = smsSpam.drop(columns=['Unnamed: 2', 'Unnamed: 3'])
-
-
+# function for finding word frequency, returns wordfreq
+smsData = smsData.dropna()
 def wordFrequency(text_dataframe):
+    index = 0
     wordFreq = nltk.FreqDist()
-
+    cleanedData = text_dataframe
     for sentences in text_dataframe.iloc[:, 1]:
+        # tokenizes words
         tokenized = sentences.split(" ")
+        # rejoins words without punctuation
+        cleanedData.iloc[index, 1] = " ".join(word for word in nltk.word_tokenize(sentences) if word not in string.punctuation)
+        #word frequency
         for word in tokenized:
             wordFreq[word.lower()] += 1
-    return wordFreq
 
-spam_wordFreq = wordFrequency(smsSpam)
+        index += 1
+    return wordFreq, cleanedData
 
-ham_wordFreq = wordFrequency(smsHam)
+[sms_WF, smsCleaned] = wordFrequency(smsData)
+print(smsCleaned)
 
-#classifier = nltk.classify.NaiveBayesClassifier.train()
-
+#split into ham and spam, index compare
+smsHam = pd.DataFrame()
+smsSpam = pd.DataFrame()
+for i in range(1, smsData.shape[0]):
+    if smsData.iloc[i, 0] == 'ham':
+        ham = smsData.iloc[i]
+        smsHam = smsHam.append(ham)
+    elif smsData.iloc[i, 0] == 'spam':
+        spam = smsData.iloc[i]
+        smsSpam = smsSpam.append(spam)
+    else:
+        print('row', i ,'not valid')
