@@ -1,0 +1,26 @@
+import pandas as pd
+import nltk
+import string
+
+smsHam = pd.read_csv('sms_Ham - spam 2.csv')
+smsHam = smsHam.drop(columns=['Unnamed: 2', 'Unnamed: 3', 'Unnamed: 4'])
+
+smsSpam = pd.read_csv('sms_Spam - Sheet1.csv')
+smsSpam = smsSpam.drop(columns=['Unnamed: 2', 'Unnamed: 3'])
+
+
+def wordFrequency(text_dataframe):
+    wordFreq = nltk.FreqDist()
+
+    for sentences in text_dataframe.iloc[:, 1]:
+        tokenized = sentences.split(" ")
+        for word in tokenized:
+            wordFreq[word.lower()] += 1
+    return wordFreq
+
+spam_wordFreq = wordFrequency(smsSpam)
+
+ham_wordFreq = wordFrequency(smsHam)
+
+#classifier = nltk.classify.NaiveBayesClassifier.train()
+
